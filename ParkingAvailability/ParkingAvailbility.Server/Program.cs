@@ -46,7 +46,11 @@ namespace ParkingAvailability.Server
                 })
                 .UseDashboard(options => {
                 })
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(HelloGrain).Assembly).WithReferences())
+                .ConfigureApplicationParts(parts => parts
+                    .AddApplicationPart(typeof(SensorGrain).Assembly).WithReferences()
+                    .AddApplicationPart(typeof(ParkingLocationGrain).Assembly).WithReferences()
+                    .AddApplicationPart(typeof(ParkingLocationContainerGrain).Assembly).WithReferences()
+                )
                 .ConfigureLogging(logging => logging.AddConsole());
 
             var host = builder.Build();

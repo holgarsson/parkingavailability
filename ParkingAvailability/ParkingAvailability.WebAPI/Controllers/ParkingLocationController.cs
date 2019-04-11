@@ -50,9 +50,11 @@ namespace ParkingAvailability.WebAPI.Controllers
         }
 
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<string> Post()
         {
+            var test = "Hello World";
 
+            return test;
         }
 
         [HttpPut("{id}")]

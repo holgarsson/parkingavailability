@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ParkingAvailability.Grains
 {
-    class ParkingLocationContainerGrain : Orleans.Grain, IParkingLocationsContainer
+    public class ParkingLocationContainerGrain : Orleans.Grain, IParkingLocationsContainer
     {
         private List<IParkingLocation> ParkingLocations { get; set; }
 

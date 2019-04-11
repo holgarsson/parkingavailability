@@ -11,7 +11,7 @@ namespace ParkingAvailability.Grains
     {
         private bool Occupied { get; set; }
 
-        private string Owner { get; set; }
+        private IParkingLocation Owner { get; set; }
 
         private Tuple<decimal, decimal> Coordinates { get; set; }
 
@@ -37,11 +37,13 @@ namespace ParkingAvailability.Grains
             return Task.FromResult(Occupied);
         }
 
-        public Task<string> GetOwner()
+        public async Task<string> GetOwner()
         {
             _logger.LogInformation("Getting owner for sensor: {0}", this.IdentityString);
 
-            return Task.FromResult(Owner);
+            var owner = await Owner.GetName();
+
+            return Task.FromResult(owner);
         }
 
         public Task SetCoordinates(decimal longitude, decimal latitude)
@@ -62,9 +64,9 @@ namespace ParkingAvailability.Grains
             return Task.CompletedTask;
         }
 
-        public Task SetOwner(string owner)
+        public Task SetOwner(IParkingLocation owner)
         {
-            _logger.LogInformation("Setting sensor {0} owner to: {1}", this.IdentityString, owner);
+            _logger.LogInformation("Setting sensor {0} owner to: {1}", this.IdentityString, owner.GetName());
 
             Owner = owner;
 
@@ -78,7 +80,7 @@ namespace ParkingAvailability.Grains
             var sb = new StringBuilder();
             sb.AppendLine($"---Summary for sensor: {this.IdentityString}");
             sb.AppendLine($"---Occupied status: {Occupied}");
-            sb.AppendLine($"---Owner: {Owner}")
+            sb.AppendLine($"---Owner: {Owner}");
             sb.AppendLine($"---Location -> long: {Coordinates.Item1}, lat: {Coordinates.Item2}");
 
             return Task.FromResult(sb.ToString());

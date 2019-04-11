@@ -21,6 +21,12 @@ namespace ParkingAvailability.WebAPI.Controllers
             _client = clusterClient;
         }
 
+        [HttpGet]
+        public async Task<string> Get()
+        {
+            return "Hello World!";
+        }
+
         [HttpGet("Coordinates")]
         public async Task<JsonResult> Coordinates(string id)
         {

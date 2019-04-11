@@ -9,7 +9,7 @@ namespace ParkingAvailbility.GrainInterfaces
     {
         Task SetOccupied(bool occupied);
 
-        Task SetOwner(string owner);
+        Task SetOwner(IParkingLocation owner);
 
         Task SetCoordinates(decimal longitude, decimal latidude);
 

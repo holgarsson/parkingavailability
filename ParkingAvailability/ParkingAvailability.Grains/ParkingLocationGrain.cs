@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ParkingAvailability.Grains
 {
-    class ParkingLocationGrain : Orleans.Grain, IParkingLocation
+    public class ParkingLocationGrain : Orleans.Grain, IParkingLocation
     {
         private List<ISensor> Sensors { get; set; }
 
@@ -81,6 +81,13 @@ namespace ParkingAvailability.Grains
             sb.AppendLine($"---Location -> long: {Coordinates.Item1}, lat: {Coordinates.Item2}");
 
             return Task.FromResult(sb.ToString());
+        }
+
+        public Task<string> GetName()
+        {
+            _logger.LogInformation("GetName() called");
+
+            return Task.FromResult(this.IdentityString);
         }
     }
 }

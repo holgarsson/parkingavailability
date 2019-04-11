@@ -19,6 +19,8 @@ namespace ParkingAvailbility.GrainInterfaces
 
         Task<IEnumerable<ISensor>> GetSensors();
 
+        Task<string> GetName();
+
         Task<string> GetSummary();
     }
 }
