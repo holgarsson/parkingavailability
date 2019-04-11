@@ -41,9 +41,7 @@ namespace ParkingAvailability.Grains
         {
             _logger.LogInformation("Getting owner for sensor: {0}", this.IdentityString);
 
-            var owner = await Owner.GetName();
-
-            return Task.FromResult(owner);
+            return await Owner.GetName();
         }
 
         public Task SetCoordinates(decimal longitude, decimal latitude)
