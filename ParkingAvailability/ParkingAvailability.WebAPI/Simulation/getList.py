@@ -298,9 +298,11 @@ GET_traffic = None
 url = 'http://localhost:65523/'
 parkingURL = url+'api/parkingLocation'
 sensorURL = url+'api/sensors'
+getURL = url+'api/userget'
+postURL = url+'api/sensorpost'
 
 for store in stores:
-	resp = requests.post(url=parkingURL, json=store)
+	requests.post(url=parkingURL, json=store)
 
 for sensor in all_sensors:
     requests.post(sensorURL, json=sensor.register())
@@ -333,10 +335,8 @@ while True:
 
     for req in requests:
         if req[0] == 'POST':
-            # POST request
-            pass
+            requests.post(url=postURL, json=req[1])
         elif req[0] == 'GET':
-            # GET request
-            pass
+            requests.get(url=getURL, json=req[1])
 
     time = time + datetime.timedelta(seconds=60)
