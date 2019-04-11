@@ -7,6 +7,7 @@ namespace ParkingAvailbility.GrainInterfaces
 {
     public interface IParkingLocationsContainer : Orleans.IGrainWithIntegerKey
     {
+
         Task AddParkingLocation(IParkingLocation parkingLocation);
 
         Task RemoveParkingLocation(IParkingLocation parkingLocation);

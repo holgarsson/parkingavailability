@@ -9,14 +9,14 @@ namespace ParkingAvailability.Grains
 {
     public class ParkingLocationContainerGrain : Orleans.Grain, IParkingLocationsContainer
     {
-        private List<IParkingLocation> ParkingLocations { get; set; }
+        private HashSet<IParkingLocation> ParkingLocations { get; set; }
 
         private readonly ILogger _logger;
 
         public ParkingLocationContainerGrain(ILogger<ParkingLocationContainerGrain> logger)
         {
             _logger = logger;
-            ParkingLocations = new List<IParkingLocation>();
+            ParkingLocations = new HashSet<IParkingLocation>();
         }
 
         public Task AddParkingLocation(IParkingLocation parkingLocation)

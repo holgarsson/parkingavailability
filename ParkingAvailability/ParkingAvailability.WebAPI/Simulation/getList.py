@@ -297,7 +297,7 @@ GET_traffic = None
 
 url = 'http://localhost:65523/'
 parkingURL = url+'api/parkingLocation'
-sensorURL = url+'api/sensors'
+sensorURL = url+'api/sensor'
 getURL = url+'api/userget'
 postURL = url+'api/sensorpost'
 

@@ -72,10 +72,12 @@ namespace ParkingAvailability.WebAPI.Controllers
         }
 
 
-        [HttpPost("sensor")]
-        public void Post([FromBody] string id, string parkingLocationId)
+        [HttpPost]
+        public async Task<string> Post(dynamic json)
         {
-            
+            var test = json;
+
+            return "Blabla";
         }
 
         [HttpPut("{id}")]

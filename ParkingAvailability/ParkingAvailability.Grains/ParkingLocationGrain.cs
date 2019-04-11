@@ -9,7 +9,7 @@ namespace ParkingAvailability.Grains
 {
     public class ParkingLocationGrain : Orleans.Grain, IParkingLocation
     {
-        private List<ISensor> Sensors { get; set; }
+        private HashSet<ISensor> Sensors { get; set; }
 
         private Tuple<decimal, decimal> Coordinates { get; set; }
 
@@ -18,7 +18,7 @@ namespace ParkingAvailability.Grains
         public ParkingLocationGrain(ILogger<ParkingLocationGrain> logger)
         {
             _logger = logger;
-            Sensors = new List<ISensor>();
+            Sensors = new HashSet<ISensor>();
         }
 
         public Task SetLocation(decimal longitude, decimal latitude)
@@ -34,7 +34,7 @@ namespace ParkingAvailability.Grains
         {
             _logger.LogInformation("Settings all sensors...");
 
-            Sensors = sensors as List<ISensor>;
+            Sensors = sensors as HashSet<ISensor>;
 
             return Task.CompletedTask;
         }

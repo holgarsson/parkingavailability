@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +10,13 @@ using ParkingAvailbility.GrainInterfaces;
 
 namespace ParkingAvailability.WebAPI.Controllers
 {
+    public struct ParkingLocation
+    {
+        public string store { get; set; }
+
+        public string[] coordinates { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class ParkingLocationController : Controller
@@ -50,11 +58,18 @@ namespace ParkingAvailability.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<string> Post()
+        public async Task<string> Post(ParkingLocation parkingLocation)
         {
-            var test = "Hello World";
+            IParkingLocationsContainer parkingLocationsContainer = _client.GetGrain<IParkingLocationsContainer>(0);
 
-            return test;
+            IParkingLocation pl = _client.GetGrain<IParkingLocation>(parkingLocation.store);
+            await pl.SetLocation(decimal.Parse(parkingLocation.coordinates[0], CultureInfo.InvariantCulture), decimal.Parse(parkingLocation.coordinates[1], CultureInfo.InvariantCulture));
+
+            var locations = await pl.GetLocation();
+
+            await parkingLocationsContainer.AddParkingLocation(pl);
+
+            return "Added";
         }
 
         [HttpPut("{id}")]
