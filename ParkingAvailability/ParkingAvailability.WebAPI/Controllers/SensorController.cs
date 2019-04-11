@@ -1,0 +1,87 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using ParkingAvailbility.GrainInterfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ParkingAvailability.WebAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class SensorController : Controller
+    {
+        private readonly IClusterClient _client;
+        private readonly ILogger _logger;
+
+        public SensorController(IClusterClient clusterClient, ILogger<SensorController> logger)
+        {
+            _client = clusterClient;
+        }
+
+        [HttpGet("Coordinates")]
+        public async Task<JsonResult> Coordinates(string id)
+        {
+            if (id == null)
+                return Json(null);
+
+            Tuple<decimal, decimal> sensorCoordinates = await _client.GetGrain<ISensor>(id).GetCoordinates();
+
+            return Json(sensorCoordinates);
+        }
+
+        [HttpGet("Occupied")]
+        public async Task<JsonResult> Occupied(string id)
+        {
+            if (id == null)
+                return Json(null);
+
+            bool sensorOccupied = await _client.GetGrain<ISensor>(id).GetOccupied();
+
+            return Json(sensorOccupied);
+        }
+
+        [HttpGet("Owner")]
+        public async Task<JsonResult> Owner(string id)
+        {
+            if (id == null)
+                return Json(null);
+
+            string owner = await _client.GetGrain<ISensor>(id).GetOwner();
+
+            return Json(owner);
+        }
+
+        [HttpGet("GetSummary")]
+        public async Task<JsonResult> Summary(string id)
+        {
+            if (id == null)
+                return Json(null);
+
+            string summary = await _client.GetGrain<ISensor>(id).GetSummary();
+
+            return Json(summary);
+        }
+
+
+        [HttpPost("sensor")]
+        public void Post([FromBody] string id, string parkingLocationId)
+        {
+            
+        }
+
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+
+        }
+
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+
+        }
+    }
+}
