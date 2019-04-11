@@ -44,6 +44,8 @@ namespace ParkingAvailability.Server
                     options.ClusterId = "dev";
                     options.ServiceId = "OrleansBasics";
                 })
+                .UseDashboard(options => {
+                })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(HelloGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole());
 
