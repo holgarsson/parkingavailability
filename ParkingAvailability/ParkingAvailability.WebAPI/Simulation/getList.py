@@ -230,56 +230,61 @@ import random
 import datetime
 import uuid
 import requests
-
+from tqdm import tqdm
 
 MAX_PARKING_SPOTS = 45
 MIN_PARKING_SPOTS = 10
 
 
 class Sensor(object):
-    def __init__(self, sen_id, owner, coordinates):
+    def __init__(self, sen_id, owner, coordinates, owner_id):
         self.id = sen_id
         self.owner = owner
+        self.owner_id = owner_id
         self.coordinates = coordinates
         self.occupied = False
         self.last_updated = datetime.datetime.now() - datetime.timedelta(minutes=10)
 
     def __str__(self):
-        return self.id + "," + self.owner + "," + str(self.coordinates) + "," + str(self.occupied)
+        return self.id + "," + self.owner + "," + self.owner_id + "," + str(self.coordinates) + "," + str(self.occupied)
 
     def update(self):
         self.occupied = not self.occupied
-        return self.id + "," + self.owner + "," + str(self.coordinates) + "," + str(self.occupied) + '\n'
+        return self.id + "," + self.owner + "," + self.owner_id + "," + str(self.coordinates) + "," + str(self.occupied) + '\n'
 
     def register(self):
-        reg = {"Id": self.id, "Owner": self.owner, "Coordinates": str(self.coordinates), "Occupied": str(self.occupied)}
+        reg = {"Id": self.id, "Owner": self.owner, "Owner_id": self.owner_id, "Coordinates": str(self.coordinates), "Occupied": str(self.occupied)}
         return reg
 
 
 lat = data['lat']
 lon = data['lon']
 
-coordinates = zip(lat, lon)
+coordinates = list(zip(lat, lon))
+coord_len = len(coordinates)
+
 parking_list = []
 stores = []
 
-for loc in coordinates:
+for loc in tqdm(coordinates, desc='Loading coordinates'):
     while True:
         owner_spot = locations[random.randint(0, len(locations)-1)]
 
         if (float(owner_spot[1]) / 1000.0) > random.random():
-            stores.append({"store": owner_spot[0], "coordinates": loc})
-            parking_list.append([owner_spot[0], loc, random.randint(MIN_PARKING_SPOTS, MAX_PARKING_SPOTS)])
+            store_id = str(uuid.uuid4())
+            stores.append({"id": store_id, "store": owner_spot[0], "coordinates": loc})
+            parking_list.append([owner_spot[0], loc, random.randint(MIN_PARKING_SPOTS, MAX_PARKING_SPOTS), store_id])
             break
 
 all_sensors = []
-for spot in parking_list:
+for spot in tqdm(parking_list, desc='Loading parking spots'):
     for num_sensors in range(random.randint(MIN_PARKING_SPOTS, MAX_PARKING_SPOTS)):
         sen_id = str(uuid.uuid4())
-        all_sensors.append(Sensor(sen_id, spot[0], spot[1]))
+        sensor_test = Sensor(sen_id, spot[0], spot[1], spot[3])
+        print(sensor_test)
+        all_sensors.append(Sensor(sen_id, spot[0], spot[1], spot[3]))
 
 len_all_sensors = len(all_sensors) - 1
-
 
 quiet_hour_begin = 22
 POST_quiet_traffic = (30, 60)
@@ -295,21 +300,22 @@ end_time = time + datetime.timedelta(weeks=52)
 POST_traffic = None
 GET_traffic = None
 
-url = 'http://localhost:65523/'
+url = 'http://localhost:54509/'
 parkingURL = url+'api/parkingLocation'
 sensorURL = url+'api/sensor'
 getURL = url+'api/userget'
 postURL = url+'api/sensorpost'
 
-for store in stores:
+for store in tqdm(stores, desc='registering stores'):
 	requests.post(url=parkingURL, json=store)
 
-for sensor in all_sensors:
+for sensor in tqdm(all_sensors, desc='registering sensors'):
     requests.post(sensorURL, json=sensor.register())
 
+
 while True:
-    if time == end_time:
-        break
+    #if time == end_time:
+    #    break
 
     if time.hour < quiet_hour_begin:
         POST_traffic = POST_quiet_traffic
@@ -320,23 +326,24 @@ while True:
 
     date_time = time.strftime("%d/%m/%Y,%H:%M:%S")
 
-    requests = []
+    requests_list = []
 
     for _ in range(random.randint(POST_traffic[0], POST_traffic[1])):
         sensor = all_sensors[random.randint(0, len_all_sensors)]            
-        requests.append(('POST', date_time + ',' + sensor.update()))
+        requests_list.append(('POST', date_time + ',' + sensor.update()))
         sensor.last_updated = time
 
     for _ in range(random.randint(GET_traffic[0], GET_traffic[1])):
-        rand_coor = coordinates[random.randint(0, len(coordinates) - 1)]
-        requests.append(('GET', date_time + ',' + str(rand_coor) + '\n'))
-
-    random.shuffle(requests)
-
-    for req in requests:
+        rand_coor = coordinates[random.randint(0, coord_len - 1)]
+        requests_list.append(('GET', date_time + ',' + str(rand_coor) + '\n'))
+    
+    random.shuffle(requests_list)
+    
+    for req in requests_list:
         if req[0] == 'POST':
             requests.post(url=postURL, json=req[1])
         elif req[0] == 'GET':
-            requests.get(url=getURL, json=req[1])
-
+            print('GET request sent to ' + getURL)
+    
     time = time + datetime.timedelta(seconds=60)
+
