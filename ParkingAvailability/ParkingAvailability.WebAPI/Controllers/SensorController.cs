@@ -53,14 +53,17 @@ namespace ParkingAvailability.WebAPI.Controllers
         }
 
         [HttpPost("Occupied")]
-        public async Task<string> Occupied(string Id, bool? Occupied)
+        public async Task<string> Occupied(dynamic jsonData)
         {
-            if (Id == null || !Occupied.HasValue)
+            string Id = jsonData.Id;
+            string OccupiedStr = jsonData.Occupied;
+            bool Occupied = bool.Parse(OccupiedStr);
+            if (Id == null)
                 return string.Empty;
 
-            await _client.GetGrain<ISensor>(Id).SetOccupied(Occupied.Value);
+            await _client.GetGrain<ISensor>(Id).SetOccupied(Occupied);
 
-            return $"Occupied status for id: {Id} set to: {Occupied.Value}";
+            return $"Occupied status for id: {Id} set to: {Occupied}";
         }
 
 
