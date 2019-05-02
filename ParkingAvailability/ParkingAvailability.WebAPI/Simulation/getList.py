@@ -232,8 +232,11 @@ import uuid
 import requests
 from tqdm import tqdm
 
-MAX_PARKING_SPOTS = 45
-MIN_PARKING_SPOTS = 10
+#MAX_PARKING_SPOTS = 45
+#MIN_PARKING_SPOTS = 10
+
+MAX_PARKING_SPOTS = 4
+MIN_PARKING_SPOTS = 2
 
 lat = data['lat']
 lon = data['lon']
@@ -304,7 +307,7 @@ time = datetime.datetime.now()
 
 POST_traffic = None
 
-url = 'http://localhost:59227/'
+url = 'http://localhost:54509/'
 parkingURL = url+'api/parkingLocation'
 sensorURL = url+'api/sensor'
 postURL = url+'api/sensor/occupied'
@@ -322,17 +325,15 @@ while True:
     elif time.hour < rush_hour_begin:
         POST_traffic = POST_rush_traffic
 
-    date_time = time.strftime("%d/%m/%Y,%H:%M:%S")
-
     requests_list = []
 
     for _ in range(random.randint(POST_traffic[0], POST_traffic[1])):
         sensor = all_sensors[random.randint(0, len_all_sensors)]            
-        requests_list.append(date_time + ',' + sensor.update())
+        requests_list.append(sensor.update())
     
     random.shuffle(requests_list)
     
-    for req in requests_list:
+    for req in tqdm(requests_list, leave=False):
         requests.post(url=postURL, json=req)
     
     time = time + datetime.timedelta(seconds=60)
