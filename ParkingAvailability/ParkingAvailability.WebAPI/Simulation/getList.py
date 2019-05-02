@@ -254,7 +254,12 @@ class Sensor(object):
 
     def update(self):
         self.occupied = not self.occupied
-        return self.id + "," + self.owner + "," + self.owner_id + "," + str(self.coordinates) + "," + str(self.occupied) + '\n'
+        new_state = {
+            'Id': self.id,
+            "Occupied": str(self.occupied)
+            }
+        
+        return new_state
 
     def register(self):
         reg = {
@@ -302,7 +307,7 @@ POST_traffic = None
 url = 'http://localhost:54509/'
 parkingURL = url+'api/parkingLocation'
 sensorURL = url+'api/sensor'
-postURL = url+'api/sensorpost'
+postURL = url+'api/sensor/occupied'
 
 for store in tqdm(stores, desc='registering stores'):
 	requests.post(url=parkingURL, json=store)
@@ -328,6 +333,7 @@ while True:
     random.shuffle(requests_list)
     
     for req in requests_list:
-        requests.post(url=postURL, json=req[1])
+        requests.post(url=postURL, json=req)
     
     time = time + datetime.timedelta(seconds=60)
+
