@@ -232,11 +232,8 @@ import uuid
 import requests
 from tqdm import tqdm
 
-#MAX_PARKING_SPOTS = 45
-#MIN_PARKING_SPOTS = 10
-
-MAX_PARKING_SPOTS = 4
-MIN_PARKING_SPOTS = 2
+MAX_PARKING_SPOTS = 45
+MIN_PARKING_SPOTS = 10
 
 lat = data['lat']
 lon = data['lon']
@@ -261,7 +258,6 @@ class Sensor(object):
             'Id': self.id,
             "Occupied": str(self.occupied)
             }
-        
         return new_state
 
     def register(self):
@@ -333,7 +329,7 @@ while True:
     
     random.shuffle(requests_list)
     
-    for req in tqdm(requests_list, leave=False):
+    for req in tqdm(requests_list, desc=str(time.time()), leave=False):
         requests.post(url=postURL, json=req)
     
     time = time + datetime.timedelta(seconds=60)
