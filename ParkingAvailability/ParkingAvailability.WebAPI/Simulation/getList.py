@@ -304,7 +304,7 @@ time = datetime.datetime.now()
 
 POST_traffic = None
 
-url = 'http://localhost:54509/'
+url = 'http://localhost:59227/'
 parkingURL = url+'api/parkingLocation'
 sensorURL = url+'api/sensor'
 postURL = url+'api/sensor/occupied'

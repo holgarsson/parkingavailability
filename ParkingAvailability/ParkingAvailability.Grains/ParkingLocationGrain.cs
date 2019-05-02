@@ -42,7 +42,6 @@ namespace ParkingAvailability.Grains
         public Task AddSensor(ISensor sensor)
         {
             _logger.LogInformation("Adding new sensor to parking location");
-
             Sensors.Add(sensor);
 
             return Task.CompletedTask;

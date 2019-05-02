@@ -12,6 +12,8 @@ namespace ParkingAvailability.WebAPI.Controllers
 {
     public struct ParkingLocation
     {
+        public string id { get; set; }
+
         public string store { get; set; }
 
         public string[] coordinates { get; set; }
@@ -62,7 +64,7 @@ namespace ParkingAvailability.WebAPI.Controllers
         {
             IParkingLocationsContainer parkingLocationsContainer = _client.GetGrain<IParkingLocationsContainer>(0);
 
-            IParkingLocation pl = _client.GetGrain<IParkingLocation>(parkingLocation.store);
+            IParkingLocation pl = _client.GetGrain<IParkingLocation>(parkingLocation.id);
             await pl.SetLocation(decimal.Parse(parkingLocation.coordinates[0], CultureInfo.InvariantCulture), decimal.Parse(parkingLocation.coordinates[1], CultureInfo.InvariantCulture));
 
             var locations = await pl.GetLocation();

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Orleans;
 using ParkingAvailbility.GrainInterfaces;
 using System;
@@ -9,6 +10,19 @@ using System.Threading.Tasks;
 
 namespace ParkingAvailability.WebAPI.Controllers
 {
+    public struct Sensor
+    {
+        public string Id { get; set; }
+
+        public string Owner { get; set; }
+
+        public string Owner_id { get; set; }
+
+        public string[] Coordinates { get; set; }
+
+        public string Occupied { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class SensorController : Controller
@@ -37,6 +51,18 @@ namespace ParkingAvailability.WebAPI.Controllers
 
             return Json(sensorCoordinates);
         }
+
+        [HttpPost("Occupied")]
+        public async Task<string> Occupied(string Id, bool? Occupied)
+        {
+            if (Id == null || !Occupied.HasValue)
+                return string.Empty;
+
+            await _client.GetGrain<ISensor>(Id).SetOccupied(Occupied.Value);
+
+            return $"Occupied status for id: {Id} set to: {Occupied.Value}";
+        }
+
 
         [HttpGet("Occupied")]
         public async Task<JsonResult> Occupied(string id)
@@ -73,11 +99,34 @@ namespace ParkingAvailability.WebAPI.Controllers
 
 
         [HttpPost]
-        public async Task<string> Post(dynamic json)
+        public async Task<string> Post(dynamic jsonSensor)
         {
-            var test = json;
+            string sensorId = jsonSensor.Id;
+            string owner = jsonSensor.Owner;
+            string owner_id = jsonSensor.Owner_id;
+            string coordinatesRaw = jsonSensor.Coordinates;
+            string[] coordinates = coordinatesRaw.Trim('(').Trim(')').Split(',');
+            string occupied = jsonSensor.Occupied;
 
-            return "Blabla";
+            Sensor sensor = new Sensor
+            {
+                Id = sensorId,
+                Owner = owner,
+                Owner_id = owner_id,
+                Coordinates = coordinates,
+                Occupied = occupied
+            };
+
+            var sensorReference = _client.GetGrain<ISensor>(sensor.Id);
+            
+            var parkingLocation = _client.GetGrain<IParkingLocation>(sensor.Owner_id);
+            await parkingLocation.AddSensor(sensorReference);
+
+            await sensorReference.SetOwner(parkingLocation);
+            await sensorReference.SetOccupied(bool.Parse(sensor.Occupied));
+            await sensorReference.SetCoordinates(decimal.Parse(coordinates[0]), decimal.Parse(coordinates[1]));
+
+            return "Sensor added";
         }
 
         [HttpPut("{id}")]
@@ -90,6 +139,15 @@ namespace ParkingAvailability.WebAPI.Controllers
         public void Delete(int id)
         {
 
+        }
+
+        private string[] GetCoordinates(string coordinates)
+        {
+            string[] cords = new string[1];
+
+            string[] coordinatesSplit = coordinates.Trim('(').Trim(')').Split(',');
+
+            return cords;
         }
     }
 }
