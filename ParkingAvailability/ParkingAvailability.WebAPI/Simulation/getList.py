@@ -227,10 +227,10 @@ locations = [
 
 
 import random
-import datetime
 import uuid
 import requests
 from tqdm import tqdm
+import time
 
 MAX_PARKING_SPOTS = 45
 MIN_PARKING_SPOTS = 10
@@ -272,7 +272,7 @@ class Sensor(object):
 parking_list = []
 stores = []
 
-for loc in tqdm(coordinates, desc='Loading coordinates'):
+for loc in coordinates:
     while True:
         owner_spot = locations[random.randint(0, len(locations)-1)]
 
@@ -286,7 +286,7 @@ for loc in tqdm(coordinates, desc='Loading coordinates'):
             break
 
 all_sensors = []
-for spot in tqdm(parking_list, desc='Loading parking spots'):
+for spot in parking_list:
     for num_sensors in range(random.randint(MIN_PARKING_SPOTS, MAX_PARKING_SPOTS)):
         sen_id = str(uuid.uuid4())
         all_sensors.append(Sensor(sen_id, spot[0], spot[1], spot[3]))
@@ -296,41 +296,32 @@ len_all_sensors = len(all_sensors) - 1
 quiet_hour_begin = 22
 POST_quiet_traffic = (30, 60)
 
-rush_hour_begin = 8
-POST_rush_traffic = (100, 400)
-
-time = datetime.datetime.now()
-
-POST_traffic = None
-
 url = 'http://localhost:54509/'
 parkingURL = url+'api/parkingLocation'
 sensorURL = url+'api/sensor'
 postURL = url+'api/sensor/occupied'
 
-for store in tqdm(stores, desc='registering stores'):
+input("Press Enter to register stores")
+for store in tqdm(stores, desc='registering stores', unit="regs"):
 	requests.post(url=parkingURL, json=store)
 
-for sensor in tqdm(all_sensors, desc='registering sensors'):
+input("Press Enter to register sensors")
+for sensor in tqdm(all_sensors, desc='registering sensors', unit="regs"):
     requests.post(sensorURL, json=sensor.register())
 
+num_sent_reqs = []
+start = time.time()
+counter = 0
 
+input("Press Enter to start sending requests")
 while True:
-    if time.hour < quiet_hour_begin:
-        POST_traffic = POST_quiet_traffic
-    elif time.hour < rush_hour_begin:
-        POST_traffic = POST_rush_traffic
+    if (time.time() - start) >= 1:
+        num_sent_reqs.append(counter)
+        counter = 0
+        start = time.time()
+        avg = round(sum(num_sent_reqs) / len(num_sent_reqs), 2)
+        print("Sending " + str(avg) + " avg requests/sec", end="\r")
 
-    requests_list = []
-
-    for _ in range(random.randint(POST_traffic[0], POST_traffic[1])):
-        sensor = all_sensors[random.randint(0, len_all_sensors)]            
-        requests_list.append(sensor.update())
-    
-    random.shuffle(requests_list)
-    
-    for req in tqdm(requests_list, desc=str(time.time()), leave=False):
-        requests.post(url=postURL, json=req)
-    
-    time = time + datetime.timedelta(seconds=60)
-
+    sensor = all_sensors[random.randint(0, len_all_sensors)]            
+    requests.post(url=postURL, json=sensor.update())
+    counter += 1
